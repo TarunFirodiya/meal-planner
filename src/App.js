@@ -4,6 +4,7 @@ import Auth from './components/Auth';
 import PreferencesForm from './components/PreferencesForm';
 import MealPlan from './components/MealPlan';
 import generateMealPlan from './utils/generateMealPlan';
+import GroceryList from './components/GroceryList';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -127,7 +128,10 @@ function App() {
             onSubmit={handlePreferencesSubmit}
           />
           {mealPlan ? (
-            <MealPlan user={user} mealPlan={mealPlan} setMealPlan={setMealPlan} />
+            <>
+              <MealPlan user={user} mealPlan={mealPlan} setMealPlan={setMealPlan} />
+              <GroceryList mealPlan={mealPlan} />
+            </>
           ) : (
             <p>No meal plan generated yet. Please submit your preferences to get started.</p>
           )}

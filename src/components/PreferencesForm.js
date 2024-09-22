@@ -1,95 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
 
-function PreferencesForm({ user, onSubmit }) {
-  const [preferences, setPreferences] = useState({
-    dietType: '',
-    allergies: [],
-    healthGoals: '',
-    calorieTarget: '',
+function PreferencesForm({ user, preferences, onSubmit }) {
+  const [formData, setFormData] = useState({
+    dietary_restrictions: '',
+    allergies: '',
+    cuisine_preferences: '',
+    cooking_skill: 'beginner',
+    meal_prep_time: '30',
   });
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch existing preferences when component mounts
-    fetchPreferences();
-  }, [user]);
-
-  const fetchPreferences = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('user_preferences')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching preferences:', error);
-    } else if (data) {
-      setPreferences(data);
+    if (preferences) {
+      setFormData(preferences);
     }
-    setLoading(false);
-  };
+  }, [preferences]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setPreferences(prev => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await onSubmit(preferences);
-      alert('Preferences saved successfully!');
-    } catch (error) {
-      console.error('Error saving preferences:', error);
-      alert('Failed to save preferences. Please try again.');
-    }
-    setLoading(false);
+    onSubmit(formData);
   };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Dietary Preferences & Health Goals</h2>
-      
-      <label>
-        Diet Type:
-        <select name="dietType" value={preferences.dietType} onChange={handleChange}>
-          <option value="">Select a diet</option>
-          <option value="omnivore">Omnivore</option>
-          <option value="vegetarian">Vegetarian</option>
-          <option value="vegan">Vegan</option>
-          <option value="keto">Keto</option>
-          <option value="paleo">Paleo</option>
-        </select>
-      </label>
-
-      <label>
-        Allergies (comma-separated):
+      <h2>Meal Preferences</h2>
+      <div>
+        <label htmlFor="dietary_restrictions">Dietary Restrictions:</label>
         <input
           type="text"
-          name="allergies"
-          value={preferences.allergies.join(',')}
-          onChange={(e) => setPreferences(prev => ({ ...prev, allergies: e.target.value.split(',').map(item => item.trim()) }))}
+          id="dietary_restrictions"
+          name="dietary_restrictions"
+          value={formData.dietary_restrictions}
+          onChange={handleChange}
         />
-      </label>
-
-      <label>
-        Health Goals:
-        <textarea name="healthGoals" value={preferences.healthGoals} onChange={handleChange} />
-      </label>
-
-      <label>
-        Daily Calorie Target:
-        <input type="number" name="calorieTarget" value={preferences.calorieTarget} onChange={handleChange} />
-      </label>
-
-      <button type="submit" disabled={loading}>
-        {loading ? 'Saving...' : 'Save Preferences'}
-      </button>
+      </div>
+      <div>
+        <label htmlFor="allergies">Allergies:</label>
+        <input
+          type="text"
+          id="allergies"
+          name="allergies"
+          value={formData.allergies}
+          onChange={handleChange}
+        />
+      </div>
+      <div>
+        <label htmlFor="cuisine_preferences">Cuisine Preferences:</label>
+        <input
+          type="text"
+          id="cuisine_preferences"
+          name="cuisine_preferences"
+          value={formData.cuisine_preferences}
+          onChange={handleChange}
+        />
+      </div>
+      <div>
+        <label htmlFor="cooking_skill">Cooking Skill:</label>
+        <select
+          id="cooking_skill"
+          name="cooking_skill"
+          value={formData.cooking_skill}
+          onChange={handleChange}
+        >
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+      <div>
+        <label htmlFor="meal_prep_time">Meal Prep Time (minutes):</label>
+        <input
+          type="number"
+          id="meal_prep_time"
+          name="meal_prep_time"
+          value={formData.meal_prep_time}
+          onChange={handleChange}
+        />
+      </div>
+      <button type="submit">Save Preferences</button>
     </form>
   );
 }
